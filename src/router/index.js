@@ -62,26 +62,28 @@ router.beforeEach((to, from, next) => {
   if (router.options.isAddDynamicMenuRoutes || fnCurrentRouteType(to, globalRoutes) === 'global') {
     next()
   } else {
-    http({
-      url: http.adornUrl('/sys/menu/nav'),
-      method: 'get',
-      params: http.adornParams()
-    }).then(({data}) => {
-      if (data && data.code === 0) {
-        fnAddDynamicMenuRoutes(data.menuList)
-        router.options.isAddDynamicMenuRoutes = true
-        sessionStorage.setItem('menuList', JSON.stringify(data.menuList || '[]'))
-        sessionStorage.setItem('permissions', JSON.stringify(data.permissions || '[]'))
-        next({ ...to, replace: true })
-      } else {
-        sessionStorage.setItem('menuList', '[]')
-        sessionStorage.setItem('permissions', '[]')
-        next()
-      }
-    }).catch((e) => {
-      console.log(`%c${e} 请求菜单列表和权限失败，跳转至登录页！！`, 'color:blue')
-      router.push({ name: 'login' })
-    })
+    next()
+    // 获取菜单和权限
+    // http({
+    //   url: http.adornUrl('/sys/menu/nav'),
+    //   method: 'get',
+    //   params: http.adornParams()
+    // }).then(({data}) => {
+    //   if (data && data.code === 0) {
+    //     fnAddDynamicMenuRoutes(data.menuList)
+    //     router.options.isAddDynamicMenuRoutes = true
+    //     sessionStorage.setItem('menuList', JSON.stringify(data.menuList || '[]'))
+    //     sessionStorage.setItem('permissions', JSON.stringify(data.permissions || '[]'))
+    //     next({ ...to, replace: true })
+    //   } else {
+    //     sessionStorage.setItem('menuList', '[]')
+    //     sessionStorage.setItem('permissions', '[]')
+    //     next()
+    //   }
+    // }).catch((e) => {
+    //   console.log(`%c${e} 请求菜单列表和权限失败，跳转至登录页！！`, 'color:blue')
+    //   router.push({ name: 'login' })
+    // })
   }
 })
 
