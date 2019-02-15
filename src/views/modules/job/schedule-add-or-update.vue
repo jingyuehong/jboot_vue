@@ -66,7 +66,7 @@
               method: 'get',
               params: this.$http.adornParams()
             }).then(({data}) => {
-              if (data && data.code === 0) {
+              if (data && data.success === true) {
                 this.dataForm.beanName = data.schedule.beanName
                 this.dataForm.methodName = data.schedule.methodName
                 this.dataForm.params = data.schedule.params
@@ -95,7 +95,7 @@
                 'status': !this.dataForm.id ? undefined : this.dataForm.status
               })
             }).then(({data}) => {
-              if (data && data.code === 0) {
+              if (data && data.success === true) {
                 this.$message({
                   message: '操作成功',
                   type: 'success',
@@ -106,7 +106,7 @@
                   }
                 })
               } else {
-                this.$message.error(data.msg)
+                this.$message.error(data.message)
               }
             })
           }

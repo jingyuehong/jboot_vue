@@ -78,14 +78,14 @@
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.$http({
-              url: this.$http.adornUrl('/sys/user/password'),
+              url: this.$http.adornUrl('/sys/user/resetPassword.json'),
               method: 'post',
               data: this.$http.adornData({
                 'password': this.dataForm.password,
                 'newPassword': this.dataForm.newPassword
               })
             }).then(({data}) => {
-              if (data && data.code === 0) {
+              if (data && data.success === true) {
                 this.$message({
                   message: '操作成功',
                   type: 'success',
@@ -100,7 +100,7 @@
                   }
                 })
               } else {
-                this.$message.error(data.msg)
+                this.$message.error(data.message)
               }
             })
           }

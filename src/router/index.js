@@ -69,7 +69,7 @@ router.beforeEach((to, from, next) => {
     //   method: 'get',
     //   params: http.adornParams()
     // }).then(({data}) => {
-    //   if (data && data.code === 0) {
+    //   if (data && data.success === true) {
     //     fnAddDynamicMenuRoutes(data.menuList)
     //     router.options.isAddDynamicMenuRoutes = true
     //     sessionStorage.setItem('menuList', JSON.stringify(data.menuList || '[]'))
@@ -150,10 +150,10 @@ export function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
       { path: '*', redirect: { name: '404' } }
     ])
     sessionStorage.setItem('dynamicMenuRoutes', JSON.stringify(mainRoutes.children || '[]'))
-    console.log('\n')
-    console.log('%c!<-------------------- 动态(菜单)路由 s -------------------->', 'color:blue')
-    console.log(mainRoutes.children)
-    console.log('%c!<-------------------- 动态(菜单)路由 e -------------------->', 'color:blue')
+    // console.log('\n')
+    // console.log('%c!<-------------------- 动态(菜单)路由 s -------------------->', 'color:blue')
+    // console.log(mainRoutes.children)
+    // console.log('%c!<-------------------- 动态(菜单)路由 e -------------------->', 'color:blue')
   }
 }
 

@@ -17,13 +17,13 @@
       <el-menu
         class="site-navbar__menu site-navbar__menu--right"
         mode="horizontal">
-        <el-menu-item index="1" @click="$router.push({ name: 'theme' })">
+        <!-- <el-menu-item index="1" @click="$router.push({ name: 'theme' })">
           <template slot="title">
             <el-badge value="new">
               <icon-svg name="shezhi" class="el-icon-setting"></icon-svg>
             </el-badge>
           </template>
-        </el-menu-item>
+        </el-menu-item> -->
         <!-- <el-menu-item index="2">
           <el-badge value="hot">
             <a href="//www.renren.io/" target="_blank">官方社区</a>
@@ -42,6 +42,7 @@
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item @click.native="updatePasswordHandle()">修改密码</el-dropdown-item>
+              <el-dropdown-item @click.native="$router.push({ name: 'theme' })">布局设置</el-dropdown-item>
               <el-dropdown-item @click.native="logoutHandle()">退出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>

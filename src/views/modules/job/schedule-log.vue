@@ -118,7 +118,7 @@
             'jobId': this.dataForm.id
           })
         }).then(({data}) => {
-          if (data && data.code === 0) {
+          if (data && data.success === true) {
             this.dataList = data.page.list
             this.totalPage = data.page.totalCount
           } else {
@@ -146,10 +146,10 @@
           method: 'get',
           params: this.$http.adornParams()
         }).then(({data}) => {
-          if (data && data.code === 0) {
+          if (data && data.success === true) {
             this.$alert(data.log.error)
           } else {
-            this.$message.error(data.msg)
+            this.$message.error(data.message)
           }
         })
       }
