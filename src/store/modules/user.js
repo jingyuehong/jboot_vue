@@ -2,7 +2,9 @@ export default {
   namespaced: true,
   state: {
     id: 0,
-    name: ''
+    name: '',
+    loginName: '',
+    portraitCode: '',
   },
   mutations: {
     updateId (state, id) {
@@ -10,6 +12,12 @@ export default {
     },
     updateName (state, name) {
       state.name = name
+    },
+    updateLoginName (state, loginName) {
+      state.loginName = loginName
+    },
+    updatePortraitCode (state, portraitCode) {
+      state.portraitCode = portraitCode
     }
   }
 }

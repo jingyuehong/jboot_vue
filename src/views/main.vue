@@ -18,6 +18,8 @@
   import MainNavbar from './main-navbar'
   import MainSidebar from './main-sidebar'
   import MainContent from './main-content'
+  import router from '@/router'
+  import {fnAddDynamicMenuRoutes} from '@/router'
   export default {
     data () {
       return {
@@ -44,6 +46,14 @@
       userName: {
         get () { return this.$store.state.user.name },
         set (val) { this.$store.commit('user/updateName', val) }
+      },
+      loginName : {
+        get () {return this.$store.state.user.loginName},
+        set (val) {this.$store.commit('user/updateLoginName', val)}
+      },
+      portraitCode : {
+        get () {return this.$store.user.portraitCode},
+        set (val) {this.$store.commit('user/updatePortraitCode', val)}
       }
     },
     created () {
@@ -68,10 +78,27 @@
           params: this.$http.adornParams()
         }).then(({data}) => {
           if (data && data.success === true) {
+            var user = data.data
             this.loading = false
-            this.userId = data.user.userId
-            this.userName = data.user.username
+            this.userId = user.userId
+            this.userName = user.displayName
+            this.portraitCode = user.portraitCode
+            this.loginName = user.userName
+            // 权限和菜单信息
+            var menuList = user.menuSet
+            var permissions = user.pemissionSet
+            // 调用routes中的菜单构建方法
+            fnAddDynamicMenuRoutes(menuList)
+            router.options.isAddDynamicMenuRoutes = true
+            sessionStorage.setItem('menuList', JSON.stringify(menuList || '[]'))
+            sessionStorage.setItem('permissions', JSON.stringify(permissions || '[]'))
+          } else {
+            sessionStorage.setItem('menuList', '[]')
+            sessionStorage.setItem('permissions', '[]')
           }
+        }).catch((e) => {
+          console.log(`获取用户信息失败，跳转至登录页！！`, 'color:blue')
+          router.push({ name: 'login' })
         })
       }
     }
