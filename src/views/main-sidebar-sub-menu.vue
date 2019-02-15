@@ -15,7 +15,7 @@
     </sub-menu>
   </el-submenu>
   <el-menu-item v-else :index="menu.menuId + ''" @click="gotoRouteHandle(menu)">
-    <icon-svg :name="menu.icon || ''" class="site-sidebar__menu-icon"></icon-svg>
+    <icon-svg :name="menu.iconStyle || ''" class="site-sidebar__menu-icon"></icon-svg>
     <span>{{ menu.name }}</span>
   </el-menu-item>
 </template>
