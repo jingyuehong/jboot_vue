@@ -120,7 +120,7 @@ export function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
         component: null,
         name: menuList[i].url.replace('/', '-'),
         meta: {
-          menuId: menuList[i].menuId,
+          menuId: menuList[i].id,
           title: menuList[i].name,
           isDynamic: true,
           isTab: true,
@@ -129,8 +129,8 @@ export function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
       }
       // url以http[s]://开头, 通过iframe展示
       if (isURL(menuList[i].url)) {
-        route['path'] = `i-${menuList[i].menuId}`
-        route['name'] = `i-${menuList[i].menuId}`
+        route['path'] = `i-${menuList[i].id}`
+        route['name'] = `i-${menuList[i].id}`
         route['meta']['iframeUrl'] = menuList[i].url
       } else {
         try {

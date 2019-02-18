@@ -106,7 +106,7 @@ export default {
         params: this.$http.adornParams({
           page: this.pageIndex - 1,
           size: this.pageSize,
-          EQ_userName: this.dataForm.userName,
+          LIKE_userName: this.dataForm.userName,
           NEQ_id:this.$store.state.user.id
         })
       }).then(({ data }) => {
