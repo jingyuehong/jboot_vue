@@ -18,19 +18,19 @@
     >
       <el-table-column type="selection" header-align="center" align="center" width="50"></el-table-column>
       <el-table-column prop="name" header-align="center" align="center" label="角色名称"></el-table-column>
-      <el-table-column prop="roleType" header-align="center" align="center" label="角色类型"></el-table-column>
+      <el-table-column prop="roleType.message" header-align="center" align="center" label="角色类型"></el-table-column>
       <el-table-column prop="remark" header-align="center" align="center" label="备注"></el-table-column>
       <el-table-column prop="createTime" header-align="center" align="center" width="180" label="创建时间" ></el-table-column>
       <el-table-column fixed="right" header-align="center" align="center" width="150" label="操作">
         <template slot-scope="scope">
           <el-button
-            v-if="scope.row.roleType != 'SYSTEM'"
+            v-if="scope.row.roleType.name != 'SYSTEM'"
             type="text"
             size="small"
             @click="addOrUpdateHandle(scope.row.id)"
           >修改</el-button>
           <el-button
-            v-if="scope.row.roleType != 'SYSTEM'"
+            v-if="scope.row.roleType.name != 'SYSTEM'"
             type="text"
             size="small"
             @click="deleteHandle(scope.row.id)"
@@ -90,7 +90,6 @@ export default {
       }).then(({ data }) => {
         if (data && data.success === true) {
           var respData = data.data;
-          console.log(JSON.stringify(respData.content))
           this.dataList = respData.content;
           this.totalPage = respData.totalElements;
         } else {
@@ -124,13 +123,14 @@ export default {
     },
     // 删除
     deleteHandle(id) {
-      var ids = id
-        ? [id]
-        : this.dataListSelections.map(item => {
-            return item.roleId;
-          });
+      // 去掉批量删除
+      // var ids = id
+      //   ? [id]
+      //   : this.dataListSelections.map(item => {
+      //       return item.roleId;
+      //     });
       this.$confirm(
-        `确定对[id=${ids.join(",")}]进行[${id ? "删除" : "批量删除"}]操作?`,
+        `角色删除后将同步删除对应的菜单权限，确定继续删除吗?`,
         "提示",
         {
           confirmButtonText: "确定",
@@ -140,15 +140,15 @@ export default {
       )
         .then(() => {
           this.$http({
-            url: this.$http.adornUrl("/sys/role/delete"),
+            url: this.$http.adornUrl("/sys/role/deleteById.json"),
             method: "post",
-            data: this.$http.adornData(ids, false)
+            data: this.$http.adornData(id, false)
           }).then(({ data }) => {
             if (data && data.success === true) {
               this.$message({
                 message: "操作成功",
                 type: "success",
-                duration: 1500,
+                duration: 1000,
                 onClose: () => {
                   this.getDataList();
                 }

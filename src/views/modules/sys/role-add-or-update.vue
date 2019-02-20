@@ -14,7 +14,7 @@
         <el-tree
           :data="menuList"
           :props="menuListTreeProps"
-          node-key="menuId"
+          node-key="key"
           ref="menuListTree"
           :default-expand-all="true"
           show-checkbox>
@@ -36,7 +36,7 @@
         visible: false,
         menuList: [],
         menuListTreeProps: {
-          label: 'name',
+          label: 'value',
           children: 'children'
         },
         dataForm: {
@@ -55,12 +55,13 @@
     methods: {
       init (id) {
         this.dataForm.id = id || 0
+        
         this.$http({
-          url: this.$http.adornUrl('/sys/menu/list'),
+          url: this.$http.adornUrl('/sys/menu/list.json'),
           method: 'get',
           params: this.$http.adornParams()
         }).then(({data}) => {
-          this.menuList = treeDataTranslate(data, 'menuId')
+          this.menuList = treeDataTranslate(data.data)
         }).then(() => {
           this.visible = true
           this.$nextTick(() => {
@@ -70,18 +71,20 @@
         }).then(() => {
           if (this.dataForm.id) {
             this.$http({
-              url: this.$http.adornUrl(`/sys/role/info/${this.dataForm.id}`),
+              url: this.$http.adornUrl(`/sys/role/findById.json`),
               method: 'get',
-              params: this.$http.adornParams()
+              params: this.$http.adornParams({
+                'id' : this.dataForm.id
+              })
             }).then(({data}) => {
               if (data && data.success === true) {
-                this.dataForm.roleName = data.role.roleName
-                this.dataForm.remark = data.role.remark
-                var idx = data.role.menuIdList.indexOf(this.tempKey)
+                this.dataForm.roleName = data.data.name
+                this.dataForm.remark = data.data.remark
+                var idx = data.data.menuIds.indexOf(this.tempKey)
                 if (idx !== -1) {
-                  data.role.menuIdList.splice(idx, data.role.menuIdList.length - idx)
+                  data.data.menuIds.splice(idx, data.data.menuIds.length - idx)
                 }
-                this.$refs.menuListTree.setCheckedKeys(data.role.menuIdList)
+                this.$refs.menuListTree.setCheckedKeys(data.data.menuIds)
               }
             })
           }
@@ -92,20 +95,20 @@
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.$http({
-              url: this.$http.adornUrl(`/sys/role/${!this.dataForm.id ? 'save' : 'update'}`),
+              url: this.$http.adornUrl(`/sys/role/saveOrUpdate.json`),
               method: 'post',
               data: this.$http.adornData({
-                'roleId': this.dataForm.id || undefined,
-                'roleName': this.dataForm.roleName,
+                'id': this.dataForm.id || undefined,
+                'name': this.dataForm.roleName,
                 'remark': this.dataForm.remark,
-                'menuIdList': [].concat(this.$refs.menuListTree.getCheckedKeys(), [this.tempKey], this.$refs.menuListTree.getHalfCheckedKeys())
+                'menuIds': [].concat(this.$refs.menuListTree.getCheckedKeys(), [this.tempKey], this.$refs.menuListTree.getHalfCheckedKeys())
               })
             }).then(({data}) => {
               if (data && data.success === true) {
                 this.$message({
                   message: '操作成功',
                   type: 'success',
-                  duration: 1500,
+                  duration: 1000,
                   onClose: () => {
                     this.visible = false
                     this.$emit('refreshDataList')

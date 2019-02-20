@@ -65,8 +65,11 @@
       },
       // 移除子节点
       removeChildNode (data, parentId) {
-        var parentIds = isArray(parentId) ? parentId : [parentId]
-        if (parentId.length <= 0) {
+        var parentIds = []
+        if (parentId) {
+          parentIds = isArray(parentId) ? parentId : [parentId]
+        }
+        if (parentIds.length <= 0) {
           return data
         }
         var ids = []
