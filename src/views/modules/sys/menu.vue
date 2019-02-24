@@ -1,12 +1,12 @@
 <template>
   <div class="mod-menu">
-    <!-- <el-form :inline="true" :model="dataForm">
+    <el-form :inline="true" :model="dataForm">
       <el-form-item>
-        <el-button v-if="isAuth('sys:menu:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
+        <el-button type="primary" @click="addOrUpdateHandle()">新增菜单目录</el-button>
       </el-form-item>
-    </el-form> -->
+    </el-form>
     <el-table :data="dataList" border style="width: 100%;">
-      <table-tree-column prop="name" header-align="center" treeKey="menuId" width="300" label="菜单名称"></table-tree-column>
+      <table-tree-column prop="name" header-align="center" treeKey="id" width="300" label="菜单名称"></table-tree-column>
       <!-- <el-table-column
         prop="parentName"
         header-align="center"
@@ -31,7 +31,9 @@
       <el-table-column prop="resCode" header-align="center" align="center" :show-overflow-tooltip="true" label="授权标识" ></el-table-column>
       <el-table-column fixed="right" header-align="center" align="center" width="150" label="操作">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)" >修改</el-button>
+          <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row)" >修改</el-button>
+          <!-- 只能删除目录 -->
+          <el-button v-if="scope.row.type.name === 'CATALOG'" type="text" size="small" @click="deleteHandle(scope.row.id)" >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -74,12 +76,16 @@ export default {
       });
     },
     // 新增 / 修改
-    addOrUpdateHandle(id) {
+    addOrUpdateHandle(row=[]) {
       this.addOrUpdateVisible = true;
       this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(id);
+        this.$refs.addOrUpdate.init(row);
       });
     },
+    deleteHandle(id) {
+      // TODO 删除
+      console.log("删除：" + id)
+    }
   }
 };
 </script>
