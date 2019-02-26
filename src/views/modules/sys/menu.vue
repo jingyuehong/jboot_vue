@@ -83,8 +83,31 @@ export default {
       });
     },
     deleteHandle(id) {
-      // TODO 删除
-      console.log("删除：" + id)
+      // 删除
+      this.$confirm('确定删除该菜单吗？', '提示', {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(() =>{
+            this.$http({
+            url: this.$http.adornUrl("/sys/menu/deleteById.json"),
+            method: "post",
+            data: this.$http.adornData(id, false)
+          }).then(({ data }) => {
+            if (data && data.success === true) {
+              this.$message({
+                message: "操作成功",
+                type: "success",
+                duration: 1000,
+                onClose: () => {
+                  this.getDataList();
+                }
+              });
+            } else {
+              this.$message.error(data.message);
+            }
+          });
+        }).catch(() => {});
     }
   }
 };

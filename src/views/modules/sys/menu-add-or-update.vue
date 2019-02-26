@@ -131,6 +131,7 @@
           this.$nextTick(() => {
             this.$refs['dataForm'].resetFields()
             this.dataForm.type =  {code :'catalog', name:'CATALOG', message:'目录'}
+            this.dataForm.parentId = 0
           })
         }).then(() => {
           if (!this.dataForm.id) {
@@ -158,7 +159,11 @@
       // 菜单树设置当前选中节点
       menuListTreeSetCurrentNode () {
         this.$refs.menuListTree.setCurrentKey(this.dataForm.parentId)
-        this.dataForm.parentName = (this.$refs.menuListTree.getCurrentNode() || {})['name']
+        if (this.dataForm.parentId) {
+          this.dataForm.parentName = (this.$refs.menuListTree.getCurrentNode() || {})['name']
+        } else {
+          this.dataForm.parentName = ''
+        }
       },
       // 图标选中
       iconActiveHandle (iconName) {
@@ -168,35 +173,34 @@
       dataFormSubmit () {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
-            console.log(JSON.stringify(this.dataForm))
-            // this.$http({
-            //   url: this.$http.adornUrl(`/sys/menu/${!this.dataForm.id ? 'save' : 'update'}`),
-            //   method: 'post',
-            //   data: this.$http.adornData({
-            //     'id': this.dataForm.id || undefined,
-            //     'type': this.dataForm.type.name,
-            //     'name': this.dataForm.name,
-            //     'parentId': this.dataForm.parentId,
-            //     'url': this.dataForm.url,
-            //     'resCode': this.dataForm.resCode,
-            //     'orderNum': this.dataForm.orderNum,
-            //     'iconStyle': this.dataForm.iconStyle
-            //   })
-            // }).then(({data}) => {
-            //   if (data && data.success === true) {
-            //     this.$message({
-            //       message: '操作成功',
-            //       type: 'success',
-            //       duration: 1000,
-            //       onClose: () => {
-            //         this.visible = false
-            //         this.$emit('refreshDataList')
-            //       }
-            //     })
-            //   } else {
-            //     this.$message.error(data.message)
-            //   }
-            // })
+            this.$http({
+              url: this.$http.adornUrl(`/sys/menu/saveOrUpdate.json`),
+              method: 'post',
+              data: this.$http.adornData({
+                'id': this.dataForm.id || undefined,
+                'type': this.dataForm.type.name,
+                'name': this.dataForm.name,
+                'parentId': this.dataForm.parentId,
+                'url': this.dataForm.url,
+                'resCode': this.dataForm.resCode,
+                'orderNum': this.dataForm.orderNum,
+                'iconStyle': this.dataForm.iconStyle
+              })
+            }).then(({data}) => {
+              if (data && data.success === true) {
+                this.$message({
+                  message: '操作成功',
+                  type: 'success',
+                  duration: 1000,
+                  onClose: () => {
+                    this.visible = false
+                    this.$emit('refreshDataList')
+                  }
+                })
+              } else {
+                this.$message.error(data.message)
+              }
+            })
           }
         })
       }
