@@ -3,9 +3,9 @@
     <el-container>
       <el-aside width="200px">
         <el-input placeholder="输入关键字进行过滤" v-model="filterText"> </el-input>
-        <el-tree class="filter-tree" :props="defaultProps" :data="groupTreeData" node-key="id"
+        <el-tree class="filter-tree" :props="defaultProps" :data="treeData" node-key="id"
          :default-expand-all="false" :filter-node-method="filterNode" ref="tree"
-         @node-click="treeNodeClick">
+         @node-click="treeNodeClick" :default-expanded-keys="expandedKeys" :highlight-current="true" :accordion="true">
         </el-tree>
       </el-aside>
       <el-main>
@@ -51,6 +51,7 @@
 
 <script>
 import { treeDataTranslate } from '@/utils'
+import { join } from 'path';
 export default {
   data() {
     return {
@@ -66,11 +67,11 @@ export default {
         enable: true,
         groupTreeId:''
       },
-      groupData:[],
-      groupTreeData:[],
+      treeData:[],
       isGroup: true,
       filterText: '',
       codeList:[],
+      expandedKeys:[],
       defaultProps: {
         label: 'name',
         children: 'children'
@@ -96,7 +97,7 @@ export default {
     // 节点过滤
     filterNode(value, data) {
       if (!value) return true;
-        return data.label.indexOf(value) !== -1;
+        return data.name.indexOf(value) !== -1;
     },
     loadGroupInfo() {
       this.$http({
@@ -105,52 +106,15 @@ export default {
         params: this.$http.adornParams()
       }).then(({ data }) => {
         if (data && data.success === true) {
-          this.groupData = data.data
-          this.groupData.forEach(ele=>{
+          this.treeData = data.data
+          this.treeData.forEach(ele=>{
             ele.id = ele.id +'_'+ele.code
           })
-          this.groupTreeData = treeDataTranslate(this.groupData,"id")
+          this.treeData = treeDataTranslate(this.treeData,"id")
         } else {
           this.$message.error(data.message);
         }
       });
-    },
-    // TODO 加载节点
-    loadNode(node, resolve) {
-      if (node.level === 0) {
-        // 加载根节点信息
-        this.$http({
-          url: this.$http.adornUrl("/sys/codevalue/groupList.json"),
-          method: "get",
-          params: this.$http.adornParams()
-        }).then(({ data }) => {
-          if (data && data.success === true) {
-            return resolve(data.data);
-          } else {
-            return resolve([]);
-          }
-        });
-      } else if (node.level == 1) {
-        // 加载子节点信息
-        var id = node.data.id;
-        if (id) {
-          this.$http({
-          url: this.$http.adornUrl("/sys/codevalue/valueList.json"),
-          method: "get",
-          params: this.$http.adornParams({
-            groupId : id
-          })
-          }).then(({ data }) => {
-            if (data && data.success === true) {
-              return resolve(treeDataTranslate(data.data,"id"));
-            } else {
-              this.$message.error(data.message);
-              return resolve([]);
-            }
-          });
-        } 
-      }
-      return resolve([]);
     },
     // 树节点点击
     treeNodeClick(data, node, ele) {
@@ -158,8 +122,9 @@ export default {
       this.dataForm.name = data.name
       this.dataForm.orderNum = data.orderNum
       this.dataForm.remark = data.remark
+      var needHandlerChild = false
       if (node.level === 1) {
-        // 分组
+        // 分组点击
         this.isGroup = true  
         this.dataForm.id = data.id.split('_')[0]
         this.dataForm.groupId = data.id.split('_')[0]
@@ -167,63 +132,70 @@ export default {
         // 加载子节点
         var children = data.children
         if (!children) {
-          this.$http({
+          needHandlerChild = true
+        }
+         this.dataForm.parentId = null
+         this.dataForm.enable = true
+      } else {
+        // 参数值点击
+        this.isGroup = false
+        this.dataForm.id = data.id
+        var parentId = data.parentId
+        if (isNaN(parentId)) {
+          this.dataForm.parentId = null
+        } else {
+          this.dataForm.parentId = data.parentId
+        }
+        this.dataForm.groupId = data.groupId
+        this.dataForm.enable = data.enable
+      }  
+      // 获得父节点选择树
+      this.loadCodeInfo(needHandlerChild)
+    },
+    // 加载参数值信息
+    loadCodeInfo(needHandlerChild) {
+      if (this.dataForm.groupId) {
+        this.$http({
           url: this.$http.adornUrl("/sys/codevalue/valueList.json"),
           method: "get",
           params: this.$http.adornParams({
             groupId : this.dataForm.groupId
           })
-          }).then(({ data }) => {
-            if (data && data.success === true) {
-              var childrenData = data.data
+        }).then(({ data }) => {
+          if (data && data.success === true) {
+            var codes = data.data
+            if (!this.isGroup && this.dataForm.id) {
+              // 去掉自身
+              codes = codes.filter(t => t.id != this.dataForm.id)
+            }
+            this.codeList = treeDataTranslate(codes, 'id')
+            var childrenData = data.data;
+            if (needHandlerChild && childrenData && childrenData.length > 0) {
               // 修改父类Id
               childrenData.forEach(element => {
                 if (!element.parentId) {
                   element.parentId = this.dataForm.groupTreeId
                 }
               });
-              this.groupData = this.groupData.concat(childrenData)
-              this.groupTreeData = treeDataTranslate(this.groupData,"id")
-            } else {
-              this.$message.error(data.message);
+              this.treeData = this.treeData.concat(childrenData)
+              this.treeData = treeDataTranslate(this.treeData,"id")
+              this.expandedKeys = [this.dataForm.groupTreeId]
             }
-          });
-        }
-      } else {
-        // 参数值
-        this.isGroup = false
-        this.dataForm.parentId = data.parentId
-        this.dataForm.groupId = data.groupId
-        this.dataForm.enable = data.enable
+          } else {
+            this.$message.error(data.message);
+          }
+        });
       }
-      // // 获得父节点选择树
-      // this.$http({
-      // url: this.$http.adornUrl("/sys/codevalue/valueList.json"),
-      // method: "get",
-      // params: this.$http.adornParams({
-      //   groupId : this.dataForm.groupId
-      // })
-      // }).then(({ data }) => {
-      //   if (data && data.success === true) {
-      //     var codes = data.data;
-      //     if (!this.isGroup && this.dataForm.id) {
-      //       // 去掉自身
-      //       codes = codes.filter(t => t.id != this.dataForm.id)
-      //     }
-      //     this.codeList = treeDataTranslate(codes, 'id')
-      //   } else {
-      //     this.$message.error(data.message);
-      //   }
-      // });
-      
     },
     // 新增按钮
     addNewCode() {
+      var groupId = this.dataForm.groupId
       this.$nextTick(() => {
         this.$refs['dataForm'].resetFields()
       })
       this.isGroup=false
       this.dataForm.id=null
+      this.dataForm.groupId = groupId
     },
     // 父节点选择事件
     parentCodeChangeHandle(data, node) {
@@ -251,14 +223,12 @@ export default {
             type: 'success',
             duration: 1000,
             onClose: () => {
+              this.loadGroupInfo()
+              this.loadCodeInfo(true)
+              this.expandedKeys=[this.dataForm.groupTreeId]
               this.$nextTick(() => {
                 this.$refs['dataForm'].resetFields()
               })
-              // if (!this.isGroup) {
-              //   this.loadNode(this.currentNode, this.currentResolve)
-              // } else {
-              //   this.loadNode(this.firstNode, this.firstResolve)
-              // }
               this.isGroup = true
             }
           })

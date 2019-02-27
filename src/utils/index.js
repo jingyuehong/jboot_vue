@@ -21,11 +21,12 @@ export function isAuth (key) {
 
 /**
  * 树形数据转换
- * @param {*} data
+ * @param {*} source
  * @param {*} id
  * @param {*} pid
  */
-export function treeDataTranslate (data, id = 'id', pid = 'parentId') {
+export function treeDataTranslate (source, id = 'id', pid = 'parentId') {
+  var data = JSON.parse(JSON.stringify(source))
   var res = []
   var temp = {}
   for (var i = 0; i < data.length; i++) {
