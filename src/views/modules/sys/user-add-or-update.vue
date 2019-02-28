@@ -5,7 +5,7 @@
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
       <el-form-item label="登录名" prop="userName">
-        <el-input v-model="dataForm.userName" :disabled="dataForm.id" placeholder="登录帐号"></el-input>
+        <el-input v-model="dataForm.userName" :disabled="!!dataForm.id" placeholder="登录帐号"></el-input>
       </el-form-item>
       <el-form-item label="用户名" prop="displayName">
         <el-input v-model="dataForm.displayName" placeholder="用户名称"></el-input>

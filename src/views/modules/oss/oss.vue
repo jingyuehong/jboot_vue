@@ -2,13 +2,10 @@
   <div class="mod-oss">
     <el-form :inline="true" :model="dataForm">
       <el-form-item>
-        <el-button type="primary" @click="configHandle()">云存储配置</el-button>
         <el-button type="primary" @click="uploadHandle()">上传文件</el-button>
-        <el-button
-          type="danger"
-          @click="deleteHandle()"
+        <el-button type="primary" @click="downloadHandle()"
           :disabled="dataListSelections.length <= 0"
-        >批量删除</el-button>
+        >批量下载</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -31,7 +28,8 @@
       <el-table-column prop="storageType.message" header-align="center" align="center" width="150" label="存储方式"></el-table-column>
       <el-table-column fixed="right" header-align="center" align="center" width="150" label="操作">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
+          <el-button v-if="endWith(scope.row.name, 'jpg') || endWith(scope.row.name, 'jpeg') || endWith(scope.row.name, 'png') " type="text" size="small" @click="viewHandle(scope.row.code)">查看</el-button>
+          <el-button type="text" size="small" @click="downloadHandle(scope.row.code)">下载</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -45,14 +43,18 @@
       layout="total, sizes, prev, pager, next, jumper"
     ></el-pagination>
     <!-- 弹窗, 云存储配置 -->
-    <config v-if="configVisible" ref="config"></config>
+    <el-dialog title="查看图片"
+      :close-on-click-modal="false" width="800px" height="500px"
+      @close="viewCloseHandle"
+      :visible.sync="viewVisible">
+      <img v-if="imageUrl" :src="imageUrl"  width="750px" height="450px">
+    </el-dialog>
     <!-- 弹窗, 上传文件 -->
     <upload v-if="uploadVisible" ref="upload" @refreshDataList="getDataList"></upload>
   </div>
 </template>
 
 <script>
-import Config from "./oss-config";
 import Upload from "./oss-upload";
 export default {
   data() {
@@ -64,12 +66,12 @@ export default {
       totalPage: 0,
       dataListLoading: false,
       dataListSelections: [],
-      configVisible: false,
-      uploadVisible: false
+      viewVisible: false,
+      uploadVisible: false,
+      imageUrl:''
     };
   },
   components: {
-    Config,
     Upload
   },
   activated() {
@@ -113,13 +115,6 @@ export default {
     selectionChangeHandle(val) {
       this.dataListSelections = val;
     },
-    // 云存储配置
-    configHandle() {
-      this.configVisible = true;
-      this.$nextTick(() => {
-        this.$refs.config.init();
-      });
-    },
     // 上传文件
     uploadHandle() {
       this.uploadVisible = true;
@@ -127,15 +122,34 @@ export default {
         this.$refs.upload.init();
       });
     },
-    // 删除
-    deleteHandle(id) {
-      var ids = id
-        ? [id]
+    // 查看
+    viewHandle(code) {
+      this.$http({
+        url: this.$http.adornUrl("/attachment/download.json"),
+        method: "post",
+        params:{
+          fileCode : code
+        },
+        responseType: 'arraybuffer' // 响应类型
+      }).then(({data}) => {
+        // 显示查看图片
+        const blob = new Blob([data])
+        this.imageUrl = URL.createObjectURL(blob)
+        this.viewVisible=true
+      });
+    },
+    viewCloseHandle() {
+      this.viewVisible = false
+    },
+    // 下载
+    downloadHandle(code) {
+      var codes = code
+        ? code
         : this.dataListSelections.map(item => {
-            return item.id;
+            return item.code;
           });
       this.$confirm(
-        `确定对[id=${ids.join(",")}]进行[${id ? "删除" : "批量删除"}]操作?`,
+        `确定进行[${code ? "下载" : "批量下载"}]操作?`,
         "提示",
         {
           confirmButtonText: "确定",
@@ -145,22 +159,14 @@ export default {
       )
         .then(() => {
           this.$http({
-            url: this.$http.adornUrl("/sys/oss/delete"),
+            url: this.$http.adornUrl("/attachment/download.json"),
             method: "post",
-            data: this.$http.adornData(ids, false)
-          }).then(({ data }) => {
-            if (data && data.success === true) {
-              this.$message({
-                message: "操作成功",
-                type: "success",
-                duration: 1000,
-                onClose: () => {
-                  this.getDataList();
-                }
-              });
-            } else {
-              this.$message.error(data.message);
-            }
+            params:{
+              fileCode : codes
+            },
+            responseType: 'arraybuffer' // 响应类型
+          }).then((resp) => {
+            this.$http.downloadHandle(resp); // 下载处理
           });
         })
         .catch(() => {});

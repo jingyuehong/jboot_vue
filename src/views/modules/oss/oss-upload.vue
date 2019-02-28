@@ -9,6 +9,7 @@
       :action="url"
       :before-upload="beforeUploadHandle"
       :on-success="successHandle"
+      :headers="headerInfo"
       multiple
       :file-list="fileList"
       style="text-align: center;">
@@ -16,6 +17,17 @@
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
       <div class="el-upload__tip" slot="tip">只支持jpg、png、gif格式的图片！</div>
     </el-upload>
+    <!-- 头像上传 -->
+    <!-- <el-upload
+      class="avatar-uploader"
+      :action="url"
+      :headers="headerInfo"
+      :show-file-list="false"
+      :on-success="handleAvatarSuccess"
+      :before-upload="beforeUploadHandle">
+      <img v-if="imageUrl" :src="imageUrl" class="avatar">
+      <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+    </el-upload> -->
   </el-dialog>
 </template>
 
@@ -27,13 +39,17 @@
         url: '',
         num: 0,
         successNum: 0,
-        fileList: []
+        fileList: [],
+        headerInfo: {},
+        imageUrl:''
       }
     },
     methods: {
       init (id) {
-        this.url = this.$http.adornUrl(`/sys/oss/upload?token=${this.$cookie.get('token')}`)
+        this.url = this.$http.adornUrl(`/attachment/upload.json`)
         this.visible = true
+        this.headerInfo={'token':this.$cookie.get('token')}
+        this.imageUrl=''
       },
       // 上传之前
       beforeUploadHandle (file) {
@@ -43,11 +59,14 @@
         }
         this.num++
       },
+      handleAvatarSuccess(res, file) {
+        this.imageUrl = URL.createObjectURL(file.raw);
+      },
       // 上传成功
       successHandle (response, file, fileList) {
         this.fileList = fileList
         this.successNum++
-        if (response && response.code === 0) {
+        if (response && response.success === true) {
           if (this.num === this.successNum) {
             this.$confirm('操作成功, 是否继续操作?', '提示', {
               confirmButtonText: '确定',
@@ -58,7 +77,7 @@
             })
           }
         } else {
-          this.$message.error(response.msg)
+          this.$message.error(response.message)
         }
       },
       // 弹窗关闭时
@@ -69,3 +88,29 @@
     }
   }
 </script>
+<!-- 头像上传样式 -->
+<style>
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+</style>

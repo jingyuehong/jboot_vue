@@ -73,4 +73,24 @@ http.adornData = (data = {}, openDefultdata = true, contentType = 'json') => {
   return contentType === 'json' ? JSON.stringify(data) : qs.stringify(data)
 }
 
+/**
+ * 下载处理
+ */
+http.downloadHandle = (response) => {
+  const fileName = response.headers['content-disposition'].split(';')[1].split('=')[1] 
+  // 后台需要设置response.setHeader("Access-Control-Expose-Headers", "Content-Disposition"); 才能获得该属性
+  const blob = new Blob([response.data])
+  if (window.navigator.msSaveOrOpenBlob) {
+    // 兼容IE10
+    navigator.msSaveBlob(blob, fileName)
+  } else {
+    //  chrome/firefox
+    let aTag = document.createElement('a')
+    aTag.download = fileName
+    aTag.href = URL.createObjectURL(blob)
+    aTag.click()
+    URL.revokeObjectURL(aTag.href)
+  }
+}
+
 export default http

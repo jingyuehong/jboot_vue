@@ -9,7 +9,7 @@
         </el-tree>
       </el-aside>
       <el-main>
-        <el-form  ref="dataForm" :model="dataForm" label-width="80px">
+        <el-form v-if="isStart"  ref="dataForm" :model="dataForm" label-width="80px">
           <el-form-item :label="isGroup ? '分组名' : '参数名'" prop="name">
             <el-input  placeholder="参数名" v-model="dataForm.name" ></el-input>
           </el-form-item>
@@ -24,7 +24,7 @@
           </el-form-item>
           <el-form-item v-if="!isGroup" label="父节点" prop="parentName">
             <el-popover ref="parentCodePopover" placement="bottom-start" trigger="click">
-              <el-tree  :data="codeList" :props="defaultProps" node-key="id" ref="parentCodeTree"
+              <el-tree  :data="codeList" :props="defaultProps" node-key="id" ref="parentCodeTree" 
                 @current-change="parentCodeChangeHandle"
                 :default-expand-all="true"
                 :highlight-current="true"
@@ -67,8 +67,10 @@ export default {
         enable: true,
         groupTreeId:''
       },
+      listTreeData:[],
       treeData:[],
       isGroup: true,
+      isStart:false,
       filterText: '',
       codeList:[],
       expandedKeys:[],
@@ -99,6 +101,7 @@ export default {
       if (!value) return true;
         return data.name.indexOf(value) !== -1;
     },
+    // 加载分组信息
     loadGroupInfo() {
       this.$http({
         url: this.$http.adornUrl("/sys/codevalue/groupList.json"),
@@ -106,18 +109,40 @@ export default {
         params: this.$http.adornParams()
       }).then(({ data }) => {
         if (data && data.success === true) {
-          this.treeData = data.data
-          this.treeData.forEach(ele=>{
+          var respData = data.data
+          respData.forEach(ele=>{
             ele.id = ele.id +'_'+ele.code
           })
-          this.treeData = treeDataTranslate(this.treeData,"id")
+          this.copyProperty(respData, this.listTreeData)
+          this.treeData = treeDataTranslate(this.listTreeData,"id")
         } else {
           this.$message.error(data.message);
         }
       });
     },
+    copyProperty(source, target=[]) {
+      if (source && source.length > 0) {
+        source.forEach(ele=>{
+          var exist = false
+          target.forEach(te =>{
+            if (ele.id === te.id) {
+                // 相同元素
+                exist = true
+                for (var key in ele) {
+                  te[key] = ele[key]
+                }
+            }
+          })
+          if (!exist) {
+            target.push(ele)
+          }
+        })
+      }
+      return target;
+    },
     // 树节点点击
     treeNodeClick(data, node, ele) {
+      this.isStart = true
       this.dataForm.code = data.code
       this.dataForm.name = data.name
       this.dataForm.orderNum = data.orderNum
@@ -153,7 +178,7 @@ export default {
       this.loadCodeInfo(needHandlerChild)
     },
     // 加载参数值信息
-    loadCodeInfo(needHandlerChild) {
+    loadCodeInfo(needHandlerChild,needHandleParentCheck=true) {
       if (this.dataForm.groupId) {
         this.$http({
           url: this.$http.adornUrl("/sys/codevalue/valueList.json"),
@@ -163,13 +188,23 @@ export default {
           })
         }).then(({ data }) => {
           if (data && data.success === true) {
-            var codes = data.data
-            if (!this.isGroup && this.dataForm.id) {
-              // 去掉自身
-              codes = codes.filter(t => t.id != this.dataForm.id)
+            var respData = JSON.stringify(data.data)
+            if (needHandleParentCheck) {
+              var codes = JSON.parse(respData)
+              if (!this.isGroup && this.dataForm.id) {
+                // 去掉自身
+                codes = codes.filter(t => t.id != this.dataForm.id)
+              }
+              this.codeList = treeDataTranslate(codes, 'id')
+              // 设置父节点选中
+              if (this.dataForm.parentId) {
+                this.$refs.parentCodeTree.setCurrentKey(this.dataForm.parentId)
+                this.dataForm.parentName = (this.$refs.parentCodeTree.getCurrentNode() || {})['name']
+              } else {
+                this.dataForm.parentName=''
+              }
             }
-            this.codeList = treeDataTranslate(codes, 'id')
-            var childrenData = data.data;
+            var childrenData = JSON.parse(respData)
             if (needHandlerChild && childrenData && childrenData.length > 0) {
               // 修改父类Id
               childrenData.forEach(element => {
@@ -177,8 +212,8 @@ export default {
                   element.parentId = this.dataForm.groupTreeId
                 }
               });
-              this.treeData = this.treeData.concat(childrenData)
-              this.treeData = treeDataTranslate(this.treeData,"id")
+              this.copyProperty(childrenData, this.listTreeData)
+              this.treeData = treeDataTranslate(this.listTreeData,"id")
               this.expandedKeys = [this.dataForm.groupTreeId]
             }
           } else {
@@ -189,13 +224,15 @@ export default {
     },
     // 新增按钮
     addNewCode() {
-      var groupId = this.dataForm.groupId
-      this.$nextTick(() => {
-        this.$refs['dataForm'].resetFields()
-      })
       this.isGroup=false
       this.dataForm.id=null
-      this.dataForm.groupId = groupId
+      this.dataForm.parentName=''
+      this.dataForm.name=''
+      this.dataForm.code=''
+      this.dataForm.orderNum=0
+      this.dataForm.remark=''
+      this.dataForm.parentId=''
+      this.dataForm.enable=true
     },
     // 父节点选择事件
     parentCodeChangeHandle(data, node) {
@@ -223,13 +260,14 @@ export default {
             type: 'success',
             duration: 1000,
             onClose: () => {
-              this.loadGroupInfo()
-              this.loadCodeInfo(true)
+              if (this.isGroup) {
+                this.loadGroupInfo()
+              } else {
+                this.loadCodeInfo(true,false)
+              }
               this.expandedKeys=[this.dataForm.groupTreeId]
-              this.$nextTick(() => {
-                this.$refs['dataForm'].resetFields()
-              })
               this.isGroup = true
+              this.isStart=false
             }
           })
         } else {

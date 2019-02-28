@@ -20,6 +20,19 @@ export function isAuth (key) {
 }
 
 /**
+ * 
+ * @param {以固定结尾} str 
+ * @param {*} key 
+ */
+export function endWith(str, key) {
+  if (str && key) {
+    var reg=new RegExp(key+"$");     
+    return reg.test(str);   
+  }
+  return false
+}
+
+/**
  * 树形数据转换
  * @param {*} source
  * @param {*} id
