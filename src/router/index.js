@@ -28,7 +28,7 @@ const frameRoutes = {
   name: 'index',
   meta: { title: '首页' },
   children: [
-      { path: '/405', component: _import('common/404'), name: '405', meta: { title: '404未找到' } }
+      { path: '/405', component: _import('common/home'), name: '405', meta: { title: '404未找到' } }
   ]
 }
 

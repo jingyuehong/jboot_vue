@@ -25,17 +25,13 @@
               </el-submenu>
             </el-submenu>
             <el-menu-item index="3" >消息中心</el-menu-item>
-            <el-menu-item index="/405" >订单管理</el-menu-item>
+            <el-menu-item index="4" @click="$router.push({ name: '405' })">订单管理</el-menu-item>
             <el-menu-item index="5"  @click="$router.push({ name: 'login' })">登录</el-menu-item>
           </el-menu>
         </div>
       </el-header>
       <el-main>
-        <el-card>
-          <keep-alive>
-            <router-view />
-          </keep-alive>
-        </el-card>
+        <router-view></router-view>
       </el-main>
       <el-footer>Footer</el-footer>
     </el-container>
