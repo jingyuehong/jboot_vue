@@ -104,7 +104,7 @@
           }).then(({data}) => {
             if (data && data.success === true) {
               clearLoginInfo()
-              this.$router.push({ name: 'login' })
+              this.$router.push({ name: 'index' })
             }
           })
         }).catch(() => {})

@@ -144,7 +144,7 @@ export default {
     // 下载
     downloadHandle(code) {
       var codes = code
-        ? code
+        ? [code]
         : this.dataListSelections.map(item => {
             return item.code;
           });
@@ -162,7 +162,7 @@ export default {
             url: this.$http.adornUrl("/attachment/download.json"),
             method: "post",
             params:{
-              fileCode : codes
+              fileCode : codes.join(',')
             },
             responseType: 'arraybuffer' // 响应类型
           }).then((resp) => {

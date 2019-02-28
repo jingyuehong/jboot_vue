@@ -21,9 +21,20 @@ const globalRoutes = [
   { path: '/login', component: _import('common/login'), name: 'login', meta: { title: '登录' } }
 ]
 
+// 框架路由
+const frameRoutes = {
+  path: '/',
+  component: _import('frame/index'),
+  name: 'index',
+  meta: { title: '首页' },
+  children: [
+      { path: '/405', component: _import('common/404'), name: '405', meta: { title: '404未找到' } }
+  ]
+}
+
 // 主入口路由(需嵌套上左右整体布局)
 const mainRoutes = {
-  path: '/',
+  path: '/main',
   component: _import('main'),
   name: 'main',
   redirect: { name: 'home' },
@@ -33,7 +44,7 @@ const mainRoutes = {
     // 1. isTab: 是否通过tab展示内容, true: 是, false: 否
     // 2. iframeUrl: 是否通过iframe嵌套展示内容, '以http[s]://开头': 是, '': 否
     // 提示: 如需要通过iframe嵌套展示内容, 但不通过tab打开, 请自行创建组件使用iframe处理!
-    { path: '/home', component: _import('common/home'), name: 'home', meta: { title: '首页' } },
+    { path: '/home', component: _import('common/home'), name: 'home', meta: { title: '主页' } },
     { path: '/theme', component: _import('common/theme'), name: 'theme', meta: { title: '主题' } },
     { path: '/demo-echarts', component: _import('demo/echarts'), name: 'demo-echarts', meta: { title: 'demo-echarts', isTab: true } },
     { path: '/demo-ueditor', component: _import('demo/ueditor'), name: 'demo-ueditor', meta: { title: 'demo-ueditor', isTab: true } }
@@ -52,7 +63,7 @@ const router = new Router({
   mode: 'hash',
   scrollBehavior: () => ({ y: 0 }),
   isAddDynamicMenuRoutes: false, // 是否已经添加动态(菜单)路由
-  routes: globalRoutes.concat(mainRoutes)
+  routes: globalRoutes.concat(frameRoutes).concat(mainRoutes)
 })
 
 router.beforeEach((to, from, next) => {
