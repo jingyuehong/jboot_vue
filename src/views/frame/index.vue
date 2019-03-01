@@ -1,41 +1,42 @@
 <template>
   <div>
     <el-container>
-      <el-header>
-        <div style="background-color:#545c64;height:61px;">
+      <el-header class="el-header-class">
           <el-menu :default-active="activeIndex"
-            class="el-menu-demo"
+            class="el-menu-class"
             mode="horizontal"
             @select="handleSelect"
             background-color="#545c64"
             text-color="#fff"
             active-text-color="#ffd04b"
             router>
-            <el-menu-item index="1">处理中心</el-menu-item>
+            <el-menu-item index="1" @click="$router.push({ name: 'index' })">首页</el-menu-item>
             <el-submenu index="2">
-              <template slot="title">我的工作台</template>
-              <el-menu-item index="2-1">选项1</el-menu-item>
-              <el-menu-item index="2-2">选项2</el-menu-item>
-              <el-menu-item index="2-3">选项3</el-menu-item>
+              <template slot="title">菜单2</template>
+              <el-menu-item index="2-1" @click="$router.push({ name: 'index' })">选项1</el-menu-item>
+              <el-menu-item index="2-2" @click="$router.push({ name: 'index' })">选项2</el-menu-item>
+              <el-menu-item index="2-3" @click="$router.push({ name: 'index' })">选项3</el-menu-item>
               <el-submenu index="2-4">
                 <template slot="title">选项4</template>
-                <el-menu-item index="2-4-1">选项1</el-menu-item>
-                <el-menu-item index="2-4-2">选项2</el-menu-item>
-                <el-menu-item index="2-4-3">选项3</el-menu-item>
+                <el-menu-item index="2-4-1" @click="$router.push({ name: 'index' })">选项1</el-menu-item>
+                <el-menu-item index="2-4-2" @click="$router.push({ name: 'index' })">选项2</el-menu-item>
+                <el-menu-item index="2-4-3" @click="$router.push({ name: 'index' })">选项3</el-menu-item>
               </el-submenu>
             </el-submenu>
-            <el-menu-item index="3" >消息中心</el-menu-item>
-            <el-menu-item index="4" @click="$router.push({ name: '405' })">订单管理</el-menu-item>
-            <el-menu-item index="5"  @click="$router.push({ name: 'login' })">登录</el-menu-item>
+            <el-menu-item index="3" @click="$router.push({ name: 'introduce' })">介绍</el-menu-item>
+            <el-menu-item index="4" @click="$router.push({ name: 'aboutus' })">关于我们</el-menu-item>
+            <el-menu-item index="5" v-if="!$cookie.get('token')"  @click="$router.push({ name: 'login' })">登录</el-menu-item>
+            <el-menu-item index="6" v-if="!!$cookie.get('token')"  @click="$router.push({ name: 'main' })">我的工作台</el-menu-item>
           </el-menu>
-        </div>
       </el-header>
-      <el-main>
+      <el-main class="el-main-class">
         <router-view></router-view>
       </el-main>
-      <el-footer>Footer</el-footer>
+      <el-footer class="el-footer-class" height="30px">
+        <div></div>
+      </el-footer>
     </el-container>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -53,9 +54,21 @@
   }
 </script>
 <style>
-  .el-menu-demo {
+  .el-header-class {
+    background-color:#545c64;
+    height:60px;
+  }
+  .el-menu-class {
     float: right;
   }
+  .el-main-class {
+    width: 100%;
+  }
+  .el-footer-class {
+    background-color:#545c64;
+    text-align: center;
+    position:absolute;
+    bottom: 0;
+    width: 100%;
+  }
 </style>
-
-

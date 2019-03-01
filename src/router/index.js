@@ -26,9 +26,12 @@ const frameRoutes = {
   path: '/',
   component: _import('frame/index'),
   name: 'index',
+  redirect: 'portal',
   meta: { title: '首页' },
   children: [
-      { path: '/405', component: _import('common/home'), name: '405', meta: { title: '404未找到' } }
+      { path: '/aboutus', component: _import('frame/aboutus'), name: 'aboutus', meta: { title: '关于我们' } },
+      { path: '/introduce', component: _import('frame/introduce'), name: 'introduce', meta: { title: '介绍' } },
+      { path: '/portal', component: _import('frame/portal'), name: 'portal', meta: { title: '门户' } }
   ]
 }
 
