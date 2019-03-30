@@ -10,7 +10,8 @@
       </div>
     </el-alert>
 
-    <script :id="ueId" class="ueditor-box" type="text/plain" style="width: 100%; height: 260px;">hello world!</script>
+    <!-- <script :id="ueId" class="ueditor-box" type="text/plain" style="width: 100%; height: 260px;">45676454576</script> -->
+    <ue  id="editor" ref="editor" style="width:50%" value="3456d"></ue>
     
     <!-- 获取内容 -->
     <p><el-button @click="getContent()">获得内容</el-button></p>
@@ -18,7 +19,7 @@
       title="内容"
       :visible.sync="dialogVisible"
       :append-to-body="true">
-      {{ ueContent }}
+      <div v-html="ueContent"></div>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
       </span>
@@ -27,28 +28,24 @@
 </template>
 
 <script>
-  import ueditor from 'ueditor'
+  import ue from '@/components/ueditor';
+  // import ueditor from 'ueditor'
   export default {
     data () {
       return {
-        ue: null,
-        ueId: `J_ueditorBox_${new Date().getTime()}`,
+        // ue: null,
+        // ueId: `J_ueditorBox_${new Date().getTime()}`,
         ueContent: '',
         dialogVisible: false
       }
     },
-    mounted () {
-      this.ue = ueditor.getEditor(this.ueId, {
-        // serverUrl: '', // 服务器统一请求接口路径
-        zIndex: 3000
-      })
+    components: {
+      ue
     },
     methods: {
       getContent () {
         this.dialogVisible = true
-        this.ue.ready(() => {
-          this.ueContent = this.ue.getContent()
-        })
+        this.ueContent = this.$refs.editor.getContent()
       }
     }
   }

@@ -19,6 +19,7 @@ const createLintingRule = () => ({
   }
 })
 
+
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
@@ -40,7 +41,7 @@ module.exports = {
   },
   module: {
     rules: [
-      ...(config.dev.useEslint ? [createLintingRule()] : []),
+      // ...(config.dev.useEslint ? [createLintingRule()] : []), // 不使用eslint检查
       {
         test: /\.vue$/,
         loader: 'vue-loader',

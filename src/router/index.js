@@ -29,7 +29,8 @@ const frameRoutes = {
   redirect: 'portal',
   meta: { title: '首页' },
   children: [
-      { path: '/aboutus', component: _import('frame/aboutus'), name: 'aboutus', meta: { title: '关于我们' } },
+      // { path: '/aboutus', component: _import('frame/aboutus'), name: 'aboutus', meta: { title: '关于我们' } },
+      { path: '/aboutus', component: _import('demo/ueditor'), name: 'aboutus', meta: { title: '关于我们' } },
       { path: '/introduce', component: _import('frame/introduce'), name: 'introduce', meta: { title: '介绍' } },
       { path: '/portal', component: _import('frame/portal'), name: 'portal', meta: { title: '门户' } }
   ]
