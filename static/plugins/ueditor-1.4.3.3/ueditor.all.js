@@ -8091,6 +8091,11 @@ UE.Editor.defaultOptions = function(editor){
                     'onsuccess':function(r){
                         try {
                             var config = isJsonp ? r:eval("("+r.responseText+")");
+                            for (var key in config) {
+                                if (key.indexOf('UrlPrefix') >= 0) {
+                                    config[key] = window.UEDITOR_BASE_URL + config[key];
+                                }
+                            }
                             utils.extend(me.options, config);
                             me.fireEvent('serverConfigLoaded');
                             me._serverConfigLoaded = true;

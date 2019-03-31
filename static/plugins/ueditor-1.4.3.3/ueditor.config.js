@@ -20,6 +20,7 @@
      * window.UEDITOR_HOME_URL = "/xxxx/xxxx/";
      */
     window.UEDITOR_HOME_URL = "/static/plugins/ueditor-1.4.3.3/";
+    window.UEDITOR_BASE_URL = window.SITE_CONFIG.baseUrl; // ueditor使用的根目录
     var URL = window.UEDITOR_HOME_URL || getUEBasePath();
 
     /**
@@ -31,7 +32,7 @@
         UEDITOR_HOME_URL: URL
 
         // 服务器统一请求接口路径
-        , serverUrl: window.SITE_CONFIG.baseUrl + "/ueditor/exec"
+        , serverUrl: window.UEDITOR_BASE_URL + "/ueditor/exec"
 
         //工具栏上的所有的功能按钮和下拉框，可以在new编辑器的实例时选择自己需要的重新定义
         // simpleupload 组件存在问题，因from提交，存在iframe跨域问题，无法显示
